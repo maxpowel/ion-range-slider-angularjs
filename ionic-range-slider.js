@@ -21,7 +21,7 @@ angular.module("ion.rangeslider").directive("ionRangeSlider", [
                 minInterval: "@",
                 maxInterval: "@",
                 dragInterval: "@",
-                values: "@",
+                values: "=",
                 fromFixed: "@",
                 fromMin: "@",
                 fromMax: "@",
@@ -53,7 +53,8 @@ angular.module("ion.rangeslider").directive("ionRangeSlider", [
             },
             replace: true,
             link: function ($scope, $element, attrs) {
-                $element.ionRangeSlider({
+
+                var parameters = {
                     min: $scope.min,
                     max: $scope.max,
                     from: $scope.from,
@@ -88,7 +89,17 @@ angular.module("ion.rangeslider").directive("ionRangeSlider", [
                     maxPostfix: $scope.max_postfix,
                     decorateBoth: $scope.decorate_both,
                     valuesSeparator: $scope.values_separator,
-                    inputValuesSeparator: $scope.input_values_separator,
+                    inputValuesSeparator: $scope.input_values_separator
+                };
+
+                // Remove undefined parameters
+                for (var propName in parameters) {
+                    if (parameters[propName] === null || parameters[propName] === undefined) {
+                        delete parameters[propName];
+                    }
+                }
+
+                $element.ionRangeSlider($.extend(parameters,{
 
                     prettify: function (value) {
                       if(!attrs.prettify) {
@@ -99,7 +110,8 @@ angular.module("ion.rangeslider").directive("ionRangeSlider", [
                     onChange: function (a) {
                         $scope.$apply(function () {
                             $scope.from = a.from;
-                            $scope.to = a.to;
+                            if($scope.to !== undefined)
+                                $scope.to = a.to;
                             $scope.onChange && $scope.onChange({
                                 a: a
                             });
@@ -107,8 +119,8 @@ angular.module("ion.rangeslider").directive("ionRangeSlider", [
                     },
                     onFinish: function () {
                         $scope.$apply($scope.onFinish);
-                    },
-                });
+                    }
+                }));
                 var watchers = [];
                 watchers.push($scope.$watch("min", function (value) {
                     $element.data("ionRangeSlider").update({
@@ -146,3 +158,4 @@ angular.module("ion.rangeslider").directive("ionRangeSlider", [
 
     }
 ])
+
